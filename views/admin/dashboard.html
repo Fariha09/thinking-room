@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — The Thinking Room</title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">The Thinking Room</div>
+        <div class="sidebar-badge">Admin Panel</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin" class="active">📋 &nbsp;Dashboard</a>
+        <a href="/admin/new">✍️ &nbsp;New Post</a>
+        <a href="/" target="_blank">🌸 &nbsp;View Blog</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/admin/logout">🚪 Log out</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="admin-main">
+      <div class="admin-topbar">
+        <h1>Dashboard</h1>
+        <a href="/admin/new" class="btn-save" style="text-decoration:none;display:inline-block">+ New Post</a>
+      </div>
+
+      <div class="admin-content">
+        <!-- Stats -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div>
+              <div class="stat-val">{{totalPosts}}</div>
+              <div class="stat-label">Total Posts</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌸</div>
+            <div>
+              <div class="stat-val">{{published}}</div>
+              <div class="stat-label">Published</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">☁️</div>
+            <div>
+              <div class="stat-val">{{drafts}}</div>
+              <div class="stat-label">Drafts</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Posts table -->
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>All Posts</h2>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{rows}}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Change password -->
+        <div style="margin-top:36px">
+          <div class="settings-card" style="max-width:420px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border:1.5px solid rgba(174,214,241,0.45);border-radius:12px;padding:28px 32px;box-shadow:0 4px 16px var(--shadow);">
+            <h2 style="font-family:var(--font-head);font-size:1.1rem;margin-bottom:20px">🔒 Change Password</h2>
+            <form method="POST" action="/admin/change-password">
+              <div class="form-group">
+                <label>New Password (min 6 characters)</label>
+                <input type="password" name="new_password" placeholder="New password…" minlength="6" required>
+              </div>
+              <button type="submit" class="btn-save">Update Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

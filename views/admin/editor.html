@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{pageTitle}} — The Thinking Room</title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">The Thinking Room</div>
+        <div class="sidebar-badge">Admin Panel</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin">📋 &nbsp;Dashboard</a>
+        <a href="/admin/new" class="active">✍️ &nbsp;New Post</a>
+        <a href="/" target="_blank">🌸 &nbsp;View Blog</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/admin/logout">🚪 Log out</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="admin-main">
+      <div class="admin-topbar">
+        <h1>{{pageTitle}}</h1>
+        <a href="/admin" class="btn-cancel">← Back</a>
+      </div>
+
+      <div class="admin-content">
+        <div class="editor-wrap">
+          <form method="POST" action="{{action}}" enctype="multipart/form-data">
+
+            <div class="form-group">
+              <label for="title">Post Title *</label>
+              <input type="text" id="title" name="title" value="{{title}}" placeholder="Give your post a title…" required>
+            </div>
+
+            <div class="form-group">
+              <label for="excerpt">Excerpt / Summary</label>
+              <textarea id="excerpt" name="excerpt" placeholder="A short description that shows on the post card…" rows="3">{{excerpt}}</textarea>
+              <div class="form-hint">This shows as the preview text on the homepage.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="content">Content (Markdown supported) *</label>
+              <textarea id="content" name="content" class="editor-textarea" placeholder="Write your story here…&#10;&#10;You can use **bold**, *italic*, # Headings, > blockquotes, and more!">{{content}}</textarea>
+              <div class="form-hint">Markdown formatting: **bold**, *italic*, # H1, ## H2, > blockquote, `code`, --- divider</div>
+            </div>
+
+            <div class="editor-row">
+              <div class="form-group">
+                <label for="categories">Categories</label>
+                <input type="text" id="categories" name="categories" value="{{categories}}" placeholder="Lifestyle, Travel, Food…">
+                <div class="form-hint">Separate multiple categories with commas.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="cover_image">Cover Image</label>
+                <input type="file" id="cover_image" name="cover_image" accept="image/*" onchange="previewImage(this)">
+                <div class="form-hint">JPG, PNG, WebP — max 10MB</div>
+                {{current_image}}
+                <img id="img-preview" class="img-preview" style="display:none" alt="Preview">
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" name="published" value="1" {{published_checked}}>
+                🌸 Publish (visible on blog)
+              </label>
+              <label class="toggle-label">
+                <input type="checkbox" name="featured" value="1" {{featured_checked}}>
+                ✨ Feature on homepage
+              </label>
+            </div>
+
+            <div class="editor-actions">
+              <button type="submit" class="btn-save">💾 Save Post</button>
+              <a href="/admin" class="btn-cancel">Cancel</a>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Markdown cheatsheet -->
+        <div style="margin-top:24px;padding:20px 24px;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border:1.5px solid rgba(174,214,241,0.4);border-radius:12px;box-shadow:0 2px 12px var(--shadow)">
+          <h3 style="font-family:var(--font-head);font-size:0.95rem;margin-bottom:14px;color:var(--ink)">📖 Markdown Quick Reference</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 24px;font-size:0.8rem;color:var(--ink-soft)">
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px"># Heading 1</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">## Heading 2</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">**bold text**</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">*italic text*</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">> blockquote</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">- list item</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">[link text](url)</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">![alt](image-url)</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">---  (divider)</code></div>
+            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">`inline code`</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function previewImage(input) {
+      const preview = document.getElementById('img-preview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+</body>
+</html>

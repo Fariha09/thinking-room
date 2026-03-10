@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} — The Thinking Room</title>
+  <meta name="description" content="{{excerpt}}">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+
+  <div class="tagline-bar">☁️ &nbsp; The Thinking Room &nbsp;·&nbsp; Where thoughts bloom &nbsp; ☁️</div>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a href="/" class="site-logo">
+        <span class="logo-main">The Thinking Room</span>
+        <span class="logo-sub">A personal journal</span>
+      </a>
+      <nav class="masthead-nav">
+        <a href="/" class="hide-mobile">Home</a>
+        <a href="/?cat=Lifestyle" class="hide-mobile">Lifestyle</a>
+        <a href="/?cat=Travel" class="hide-mobile">Travel</a>
+        <a href="/?cat=Reflections" class="hide-mobile">Reflections</a>
+        <a href="/admin" class="admin-link">✍️ Write</a>
+      </nav>
+      <form class="search-form" action="/" method="GET">
+        <div class="search-wrap">
+          <input type="text" name="q" placeholder="Search posts…">
+          <button type="submit">🔍</button>
+        </div>
+      </form>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <a href="/" class="back-link">← Back to all stories</a>
+
+    <article class="post-container">
+      <header class="post-header">
+        <div class="post-header-meta">
+          <span style="font-size:0.75rem;color:var(--ink-faint)">{{date}}</span>
+          <div class="card-tags">{{categories}}</div>
+        </div>
+        <h1 class="post-title">{{title}}</h1>
+        <p style="color:var(--ink-soft);font-size:1.05rem;max-width:580px;margin:0 auto;line-height:1.7">{{excerpt}}</p>
+      </header>
+
+      {{cover}}
+
+      <div class="post-body">
+        {{content}}
+      </div>
+    </article>
+
+    <!-- Related posts -->
+    <section class="related-section">
+      <div class="section-header">
+        <h2 class="section-title">More Stories</h2>
+      </div>
+      <div class="related-grid">
+        {{related}}
+      </div>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-logo">The Thinking Room</div>
+    <p class="footer-copy">Made with ☁️ and lots of tea &nbsp;·&nbsp; <a href="/admin" style="color:var(--ink-faint);text-decoration:none">Admin</a></p>
+  </footer>
+
+</body>
+</html>

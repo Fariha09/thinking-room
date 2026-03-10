@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Thinking Room</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+
+  <!-- Tagline bar -->
+  <div class="tagline-bar">☁️ &nbsp; The Thinking Room &nbsp;·&nbsp; Where thoughts bloom &nbsp; ☁️</div>
+
+  <!-- Header -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a href="/" class="site-logo">
+        <span class="logo-main">The Thinking Room</span>
+        <span class="logo-sub">A personal journal</span>
+      </a>
+      <nav class="masthead-nav">
+        <a href="/" class="hide-mobile">Home</a>
+        <a href="/?cat=Lifestyle" class="hide-mobile">Lifestyle</a>
+        <a href="/?cat=Travel" class="hide-mobile">Travel</a>
+        <a href="/?cat=Reflections" class="hide-mobile">Reflections</a>
+        <a href="/admin" class="admin-link">✍️ Write</a>
+      </nav>
+      <form class="search-form" action="/" method="GET">
+        <div class="search-wrap">
+          <input type="text" name="q" placeholder="Search posts…" value="{{search}}">
+          <button type="submit">🔍</button>
+        </div>
+      </form>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+
+    <!-- Featured post -->
+    {{featured}}
+
+    <div class="section-header">
+      <h2 class="section-title">Latest Stories</h2>
+      <span style="font-size:0.78rem;color:var(--ink-faint)">{{total}} posts</span>
+    </div>
+
+    <div class="content-wrap">
+      <!-- Posts -->
+      <main>
+        <div class="posts-grid">
+          {{posts}}
+        </div>
+        {{pagination}}
+      </main>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-widget about-widget">
+          <div class="about-avatar">🌸</div>
+          <h3 class="widget-title" style="text-align:center;border:none;padding:0;margin-bottom:12px">Hello there ✨</h3>
+          <p>Welcome to The Thinking Room — my quiet corner of the internet where I write about life, ideas, and everything in between.</p>
+        </div>
+
+        <div class="sidebar-widget">
+          <h3 class="widget-title">🗂 Categories</h3>
+          {{categories}}
+          <a href="/" class="cat-link" style="margin-top:8px;font-size:0.78rem;color:var(--ink-faint)">View all posts</a>
+        </div>
+
+        <div class="sidebar-widget" style="background:linear-gradient(135deg,rgba(174,214,241,0.2),rgba(201,184,224,0.2))">
+          <h3 class="widget-title">☁️ Quote of the Day</h3>
+          <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.95rem;color:var(--ink-soft);line-height:1.7">
+            "She made broken look beautiful and strong look invincible. She walked with the universe on her shoulders and made it look like a pair of wings."
+          </p>
+          <p style="font-size:0.72rem;color:var(--ink-faint);margin-top:10px">— Ariana Dancu</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-logo">The Thinking Room</div>
+    <p class="footer-copy">Made with ☁️ and lots of tea &nbsp;·&nbsp; <a href="/admin" style="color:var(--ink-faint);text-decoration:none">Admin</a></p>
+  </footer>
+
+</body>
+</html>
