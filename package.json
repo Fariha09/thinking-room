@@ -1,6 +1,6 @@
 {
   "name": "thinking-room",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "The Thinking Room - A personal blog site",
   "main": "server.js",
   "scripts": {
@@ -9,14 +9,18 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^9.4.3",
+    "cloudinary": "^2.2.0",
     "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "marked": "^11.1.1",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
