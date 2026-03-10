@@ -41,6 +41,8 @@
       <header class="post-header">
         <div class="post-header-meta">
           <span style="font-size:0.75rem;color:var(--ink-faint)">{{date}}</span>
+          <span class="post-readtime">🕐 {{readtime}}</span>
+          <span class="post-views">👁 {{viewcount}} views</span>
           <div class="card-tags">{{categories}}</div>
         </div>
         <h1 class="post-title">{{title}}</h1>
@@ -53,6 +55,48 @@
         {{content}}
       </div>
     </article>
+
+    <!-- Newsletter signup -->
+    <section class="newsletter-section">
+      <div class="newsletter-inner">
+        <div class="newsletter-icon">☁️</div>
+        <h2 class="newsletter-title">Stay in the loop</h2>
+        <p class="newsletter-desc">Get new stories from The Thinking Room delivered to your inbox. No spam, just thoughts.</p>
+        <form class="newsletter-form" method="POST" action="/newsletter/subscribe">
+          <input type="text" name="name" placeholder="Your name (optional)">
+          <input type="email" name="email" placeholder="Your email address…" required>
+          <button type="submit" class="btn-primary">Subscribe ✨</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Comments -->
+    <section class="comments-section" id="comments">
+      <div class="section-header">
+        <h2 class="section-title">💬 Comments <span style="font-size:0.9rem;font-weight:400;color:var(--ink-faint)">({{commentcount}})</span></h2>
+      </div>
+
+      <div class="comments-list">
+        {{comments}}
+      </div>
+
+      <div class="comment-form-wrap">
+        <h3 class="comment-form-title">Leave a comment 🌸</h3>
+        <form method="POST" action="/post/{{postid}}/comment" class="comment-form">
+          <div class="comment-form-row">
+            <div class="form-group">
+              <label>Your Name *</label>
+              <input type="text" name="name" placeholder="How shall we call you?" required maxlength="80">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Comment *</label>
+            <textarea name="body" placeholder="Share your thoughts…" required maxlength="2000" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Post Comment →</button>
+        </form>
+      </div>
+    </section>
 
     <!-- Related posts -->
     <section class="related-section">

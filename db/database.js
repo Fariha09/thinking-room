@@ -20,6 +20,7 @@ db.exec(`
     cover_image TEXT,
     published   INTEGER DEFAULT 0,
     featured    INTEGER DEFAULT 0,
+    view_count  INTEGER DEFAULT 0,
     created_at  TEXT DEFAULT (datetime('now')),
     updated_at  TEXT DEFAULT (datetime('now'))
   );
@@ -27,7 +28,27 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT
   );
+  CREATE TABLE IF NOT EXISTS comments (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id    INTEGER NOT NULL,
+    name       TEXT NOT NULL,
+    body       TEXT NOT NULL,
+    approved   INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+  );
+  CREATE TABLE IF NOT EXISTS subscribers (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    email      TEXT UNIQUE NOT NULL,
+    name       TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `);
+
+// Add view_count column if it doesn't exist yet (migration for existing DBs)
+try {
+  db.prepare(`ALTER TABLE posts ADD COLUMN view_count INTEGER DEFAULT 0`).run();
+} catch(e) { /* column already exists */ }
 
 const existing = db.prepare(`SELECT value FROM settings WHERE key='admin_password'`).get();
 if (!existing) {

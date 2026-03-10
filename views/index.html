@@ -9,6 +9,12 @@
 </head>
 <body>
 
+  <!-- Newsletter success toast -->
+  <div id="sub-toast" class="sub-toast" style="display:none">
+    🌸 You're subscribed! Thank you for joining The Thinking Room.
+    <button onclick="document.getElementById('sub-toast').style.display='none'" style="background:none;border:none;cursor:pointer;margin-left:12px;font-size:1rem">✕</button>
+  </div>
+
   <!-- Tagline bar -->
   <div class="tagline-bar">☁️ &nbsp; The Thinking Room &nbsp;·&nbsp; Where thoughts bloom &nbsp; ☁️</div>
 
@@ -84,6 +90,15 @@
     <div class="footer-logo">The Thinking Room</div>
     <p class="footer-copy">Made with ☁️ and lots of tea &nbsp;·&nbsp; <a href="/admin" style="color:var(--ink-faint);text-decoration:none">Admin</a></p>
   </footer>
+
+  <script>
+    // Show subscribe toast if redirected after subscribe
+    if (window.location.search.includes('subscribed=1')) {
+      document.getElementById('sub-toast').style.display = 'flex';
+      window.history.replaceState({}, '', '/');
+      setTimeout(() => { document.getElementById('sub-toast').style.display = 'none'; }, 5000);
+    }
+  </script>
 
 </body>
 </html>

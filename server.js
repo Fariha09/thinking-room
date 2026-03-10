@@ -42,6 +42,11 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+function readTime(content) {
+  const words = (content || '').replace(/#|\*|`|>/g, '').trim().split(/\s+/).length;
+  return `${Math.max(1, Math.round(words / 200))} min read`;
+}
+
 function buildPostCard(post) {
   const img = post.cover_image
     ? `<div class="card-img"><img src="/uploads/${post.cover_image}" alt="${post.title}"></div>`
@@ -50,7 +55,12 @@ function buildPostCard(post) {
     ? post.categories.split(',').map(c => `<span class="tag">${c.trim()}</span>`).join('')
     : '';
   return `<article class="post-card">${img}<div class="card-body">
-    <div class="card-meta"><span class="card-date">${formatDate(post.created_at)}</span><div class="card-tags">${cats}</div></div>
+    <div class="card-meta">
+      <span class="card-date">${formatDate(post.created_at)}</span>
+      <span class="card-readtime">🕐 ${readTime(post.content)}</span>
+      <span class="card-views">👁 ${post.view_count || 0}</span>
+      <div class="card-tags">${cats}</div>
+    </div>
     <h2 class="card-title"><a href="/post/${post.slug}">${post.title}</a></h2>
     <p class="card-excerpt">${post.excerpt || ''}</p>
     <a href="/post/${post.slug}" class="read-more">Read more →</a>
@@ -126,16 +136,129 @@ app.get('/', (req, res) => {
 app.get('/post/:slug', (req, res) => {
   const post = db.prepare(`SELECT * FROM posts WHERE slug=? AND published=1`).get(req.params.slug);
   if (!post) return res.redirect('/');
+
+  // Increment view count
+  db.prepare(`UPDATE posts SET view_count = view_count + 1 WHERE id=?`).run(post.id);
+
   const related = db.prepare(`SELECT * FROM posts WHERE published=1 AND id != ? ORDER BY RANDOM() LIMIT 3`).all(post.id);
+  const comments = db.prepare(`SELECT * FROM comments WHERE post_id=? AND approved=1 ORDER BY created_at ASC`).all(post.id);
+  const commentCount = db.prepare(`SELECT COUNT(*) as c FROM comments WHERE post_id=? AND approved=1`).get(post.id).c;
+
+  const commentsHTML = comments.length
+    ? comments.map(c => `
+        <div class="comment">
+          <div class="comment-header">
+            <span class="comment-avatar">${c.name.charAt(0).toUpperCase()}</span>
+            <div>
+              <span class="comment-name">${c.name}</span>
+              <span class="comment-date">${formatDate(c.created_at)}</span>
+            </div>
+          </div>
+          <p class="comment-body">${c.body.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</p>
+        </div>`).join('')
+    : '<p class="no-comments">No comments yet. Be the first to share your thoughts! 🌸</p>';
+
   renderFile(path.join(__dirname, 'views/post.html'), {
     title: post.title,
     date: formatDate(post.created_at),
+    readtime: readTime(post.content),
+    viewcount: (post.view_count || 0) + 1,
     categories: post.categories ? post.categories.split(',').map(c => `<span class="tag">${c.trim()}</span>`).join('') : '',
     cover: post.cover_image ? `<img src="/uploads/${post.cover_image}" alt="${post.title}" class="post-cover">` : '',
     content: marked(post.content || ''),
     excerpt: post.excerpt || '',
-    related: related.map(buildPostCard).join('')
+    related: related.map(buildPostCard).join(''),
+    postid: post.id,
+    comments: commentsHTML,
+    commentcount: commentCount
   }, res);
+});
+
+// ── COMMENTS ──────────────────────────────────────
+
+app.post('/post/:id/comment', (req, res) => {
+  const { name, body } = req.body;
+  const post = db.prepare(`SELECT slug FROM posts WHERE id=? AND published=1`).get(req.params.id);
+  if (!post || !name || !body) return res.redirect('back');
+  db.prepare(`INSERT INTO comments (post_id, name, body, approved) VALUES (?, ?, ?, 1)`)
+    .run(req.params.id, name.trim().substring(0, 80), body.trim().substring(0, 2000));
+  res.redirect(`/post/${post.slug}#comments`);
+});
+
+// Admin: view all comments
+app.get('/admin/comments', requireAuth, (req, res) => {
+  const comments = db.prepare(`
+    SELECT c.*, p.title as post_title, p.slug as post_slug
+    FROM comments c JOIN posts p ON c.post_id = p.id
+    ORDER BY c.created_at DESC`).all();
+
+  const rowsHTML = comments.map(c => `
+    <tr>
+      <td>${c.name}</td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.body}</td>
+      <td><a href="/post/${c.post_slug}" target="_blank" style="color:var(--accent)">${c.post_title}</a></td>
+      <td><span class="badge ${c.approved ? 'badge-pub' : 'badge-draft'}">${c.approved ? 'Approved' : 'Pending'}</span></td>
+      <td>${formatDate(c.created_at)}</td>
+      <td class="actions">
+        ${!c.approved ? `<form method="POST" action="/admin/comments/${c.id}/approve" style="display:inline"><button class="btn-sm btn-edit" type="submit">Approve</button></form>` : ''}
+        <form method="POST" action="/admin/comments/${c.id}/delete" style="display:inline" onsubmit="return confirm('Delete comment?')">
+          <button class="btn-sm btn-del" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--ink-faint)">No comments yet.</td></tr>';
+
+  renderFile(path.join(__dirname, 'views/admin/comments.html'), {
+    rows: rowsHTML,
+    total: comments.length,
+    pending: comments.filter(c => !c.approved).length
+  }, res);
+});
+
+app.post('/admin/comments/:id/approve', requireAuth, (req, res) => {
+  db.prepare(`UPDATE comments SET approved=1 WHERE id=?`).run(req.params.id);
+  res.redirect('/admin/comments');
+});
+
+app.post('/admin/comments/:id/delete', requireAuth, (req, res) => {
+  db.prepare(`DELETE FROM comments WHERE id=?`).run(req.params.id);
+  res.redirect('/admin/comments');
+});
+
+// ── NEWSLETTER ──────────────────────────────────────
+
+app.post('/newsletter/subscribe', (req, res) => {
+  const { email, name } = req.body;
+  if (!email || !email.includes('@')) return res.redirect('back');
+  try {
+    db.prepare(`INSERT OR IGNORE INTO subscribers (email, name) VALUES (?, ?)`).run(email.trim(), (name || '').trim());
+  } catch(e) { /* duplicate */ }
+  res.redirect('/?subscribed=1');
+});
+
+app.get('/admin/subscribers', requireAuth, (req, res) => {
+  const subs = db.prepare(`SELECT * FROM subscribers ORDER BY created_at DESC`).all();
+  const rowsHTML = subs.map(s => `
+    <tr>
+      <td>${s.name || '—'}</td>
+      <td>${s.email}</td>
+      <td>${formatDate(s.created_at)}</td>
+      <td class="actions">
+        <form method="POST" action="/admin/subscribers/${s.id}/delete" style="display:inline" onsubmit="return confirm('Remove subscriber?')">
+          <button class="btn-sm btn-del" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--ink-faint)">No subscribers yet.</td></tr>';
+
+  renderFile(path.join(__dirname, 'views/admin/subscribers.html'), {
+    rows: rowsHTML,
+    total: subs.length,
+    emails: subs.map(s => s.email).join(', ')
+  }, res);
+});
+
+app.post('/admin/subscribers/:id/delete', requireAuth, (req, res) => {
+  db.prepare(`DELETE FROM subscribers WHERE id=?`).run(req.params.id);
+  res.redirect('/admin/subscribers');
 });
 
 // ── ADMIN ROUTES ──────────────────────────────────────
@@ -161,15 +284,32 @@ app.get('/admin/logout', (req, res) => { req.session.destroy(); res.redirect('/a
 app.get('/admin', requireAuth, (req, res) => {
   const posts = db.prepare(`SELECT * FROM posts ORDER BY created_at DESC`).all();
   const published = posts.filter(p => p.published).length;
+  const totalComments = db.prepare(`SELECT COUNT(*) as c FROM comments`).get().c;
+  const pendingComments = db.prepare(`SELECT COUNT(*) as c FROM comments WHERE approved=0`).get().c;
+  const totalSubs = db.prepare(`SELECT COUNT(*) as c FROM subscribers`).get().c;
+  const topPosts = db.prepare(`SELECT title, slug, view_count FROM posts WHERE published=1 ORDER BY view_count DESC LIMIT 5`).all();
+
+  const topPostsHTML = topPosts.map((p, i) => `
+    <div class="top-post-row">
+      <span class="top-rank">${i + 1}</span>
+      <span class="top-title"><a href="/post/${p.slug}" target="_blank">${p.title}</a></span>
+      <span class="top-views">👁 ${p.view_count || 0}</span>
+    </div>`).join('') || '<p style="color:var(--ink-faint);font-size:0.85rem">No views yet.</p>';
+
   renderFile(path.join(__dirname, 'views/admin/dashboard.html'), {
     totalPosts: posts.length,
     published,
     drafts: posts.length - published,
+    totalComments,
+    pendingComments,
+    totalSubs,
+    topPosts: topPostsHTML,
     rows: posts.map(p => `
       <tr>
         <td>${p.title}</td>
         <td><span class="badge ${p.published ? 'badge-pub' : 'badge-draft'}">${p.published ? 'Published' : 'Draft'}</span></td>
         <td>${formatDate(p.created_at)}</td>
+        <td style="text-align:center">👁 ${p.view_count || 0}</td>
         <td class="actions">
           <a href="/admin/edit/${p.id}" class="btn-sm btn-edit">Edit</a>
           <a href="/post/${p.slug}" target="_blank" class="btn-sm btn-view">View</a>
@@ -177,7 +317,7 @@ app.get('/admin', requireAuth, (req, res) => {
             <button type="submit" class="btn-sm btn-del">Delete</button>
           </form>
         </td>
-      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--ink-faint)">No posts yet. Write your first one! 🌸</td></tr>'
+      </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--ink-faint)">No posts yet. Write your first one! 🌸</td></tr>'
   }, res);
 });
 
@@ -227,7 +367,7 @@ app.post('/admin/delete/:id', requireAuth, (req, res) => {
 app.post('/admin/change-password', requireAuth, (req, res) => {
   const { new_password } = req.body;
   if (new_password && new_password.length >= 6) {
-    db.prepare(`UPDATE settings SET value=? WHERE key='admin_password'`).run(bcrypt.hashSync('morecoffeeplease', 10));
+    db.prepare(`UPDATE settings SET value=? WHERE key='admin_password'`).run(bcrypt.hashSync(new_password, 10));
   }
   res.redirect('/admin');
 });

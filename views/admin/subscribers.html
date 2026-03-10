@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribers — The Thinking Room</title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">The Thinking Room</div>
+        <div class="sidebar-badge">Admin Panel</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin">📋 &nbsp;Dashboard</a>
+        <a href="/admin/new">✍️ &nbsp;New Post</a>
+        <a href="/admin/comments">💬 &nbsp;Comments</a>
+        <a href="/admin/subscribers" class="active">📧 &nbsp;Subscribers</a>
+        <a href="/" target="_blank">🌸 &nbsp;View Blog</a>
+      </nav>
+      <div class="sidebar-footer"><a href="/admin/logout">🚪 Log out</a></div>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-topbar">
+        <h1>Newsletter Subscribers</h1>
+        <span style="font-size:0.82rem;color:var(--ink-faint)">{{total}} subscribers</span>
+      </div>
+      <div class="admin-content">
+        <div class="table-wrap" style="margin-bottom:24px">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>{{rows}}</tbody>
+          </table>
+        </div>
+        <div style="background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border:1.5px solid rgba(174,214,241,0.45);border-radius:12px;padding:24px 28px;box-shadow:0 4px 16px var(--shadow)">
+          <h3 style="font-family:var(--font-head);font-size:1rem;margin-bottom:12px">📋 All Emails (copy to send newsletter)</h3>
+          <textarea readonly style="width:100%;min-height:80px;padding:10px 14px;background:var(--sky-light);border:1.5px solid rgba(174,214,241,0.5);border-radius:8px;font-size:0.82rem;color:var(--ink-soft);resize:vertical;font-family:monospace">{{emails}}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
