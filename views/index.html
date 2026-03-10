@@ -38,8 +38,39 @@
           <button type="submit">🔍</button>
         </div>
       </form>
+      <!-- Hamburger (mobile only) -->
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav" id="mobile-nav" role="dialog" aria-label="Navigation menu">
+    <div class="mobile-nav-backdrop" id="nav-backdrop"></div>
+    <div class="mobile-nav-drawer">
+      <div class="mobile-nav-header">
+        <span class="mobile-nav-logo">The Thinking Room</span>
+        <button class="mobile-nav-close" id="nav-close" aria-label="Close menu">✕</button>
+      </div>
+      <nav class="mobile-nav-links">
+        <a href="/">🏠 &nbsp;Home</a>
+        <a href="/?cat=Lifestyle">🌸 &nbsp;Lifestyle</a>
+        <a href="/?cat=Travel">✈️ &nbsp;Travel</a>
+        <a href="/?cat=Food">🍵 &nbsp;Food</a>
+        <a href="/?cat=Reflections">☁️ &nbsp;Reflections</a>
+        <a href="/admin" class="mobile-admin-link">✍️ Write a Post</a>
+      </nav>
+      <div class="mobile-search">
+        <form action="/" method="GET">
+          <div class="mobile-search-wrap">
+            <input type="text" name="q" placeholder="Search posts…" value="{{search}}">
+            <button type="submit">🔍</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <div class="page-wrap">
 
@@ -92,7 +123,31 @@
   </footer>
 
   <script>
-    // Show subscribe toast if redirected after subscribe
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    const navClose = document.getElementById('nav-close');
+    const navBackdrop = document.getElementById('nav-backdrop');
+
+    function openNav() {
+      mobileNav.classList.add('open');
+      hamburger.classList.add('open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeNav() {
+      mobileNav.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', openNav);
+    navClose.addEventListener('click', closeNav);
+    navBackdrop.addEventListener('click', closeNav);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+
+    // Subscribe toast
     if (window.location.search.includes('subscribed=1')) {
       document.getElementById('sub-toast').style.display = 'flex';
       window.history.replaceState({}, '', '/');

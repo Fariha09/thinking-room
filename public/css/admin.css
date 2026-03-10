@@ -199,3 +199,33 @@ tr:hover td { background:rgba(174,214,241,0.06); }
   .editor-row{grid-template-columns:1fr}
   .settings-grid{grid-template-columns:1fr}
 }
+
+/* ── Admin Responsive ──────────────────────── */
+@media(max-width:768px){
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+  .admin-topbar { padding: 14px 20px; flex-wrap: wrap; gap: 10px; }
+  .admin-topbar h1 { font-size: 1.2rem; }
+  .admin-content { padding: 20px 16px; }
+  .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { padding: 16px 18px; gap: 12px; }
+  .stat-val { font-size: 1.6rem; }
+  .editor-wrap { padding: 24px 18px; }
+  .editor-row { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 10px 12px; }
+  .btn-sm { padding: 4px 9px; font-size: 0.68rem; }
+  /* Admin dashboard two-col layout */
+  div[style*="grid-template-columns:1fr 340px"] { display: block !important; }
+  div[style*="grid-template-columns:1fr 340px"] > div:last-child { margin-top: 20px; }
+}
+
+@media(max-width:480px){
+  .stat-cards { grid-template-columns: 1fr 1fr; }
+  .admin-content { padding: 16px 12px; }
+  .login-box { padding: 36px 24px; }
+  .login-logo { font-size: 1.8rem; }
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 540px; }
+}
