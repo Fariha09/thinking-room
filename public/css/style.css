@@ -246,7 +246,7 @@ body::before {
 .card-title a:hover { color:var(--accent); }
 .card-excerpt {
   font-size:0.86rem; color:var(--ink-soft); line-height:1.65; flex:1; margin-bottom:14px;
-  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
 }
 .read-more {
   font-size:0.75rem; font-weight:700; text-transform:uppercase;
