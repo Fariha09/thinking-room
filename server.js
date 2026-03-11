@@ -74,6 +74,8 @@ function formatDate(iso) {
 }
 function renderContent(raw) {
   if (!raw) return '';
+  // If it looks like HTML (new editor format), return as-is
+  if (raw.trim().startsWith('<')) return raw;
   try {
     const data = JSON.parse(raw);
     if (!data.blocks) throw new Error('not editorjs');
@@ -439,7 +441,7 @@ app.get('/admin', requireAuth, async (req, res) => {
 app.get('/admin/new', requireAuth, (req, res) => {
   renderFile(path.join(__dirname, 'views/admin/editor.html'), {
     pageTitle: 'New Post', action: '/admin/new',
-    title: '', excerpt: '', content: '', content_raw: '', categories: '',
+    title: '', excerpt: '', content: '', content_raw: '', content_html: '', categories: '',
     published_checked: '', featured_checked: '', current_image: ''
   }, res);
 });
@@ -468,6 +470,7 @@ app.get('/admin/edit/:id', requireAuth, async (req, res) => {
       title: post.title||'', excerpt: post.excerpt||'',
       content: (post.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
       content_raw: (post.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+      content_html: '',
       categories: post.categories||'',
       published_checked: post.published ? 'checked' : '',
       featured_checked:  post.featured  ? 'checked' : '',
