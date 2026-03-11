@@ -11,6 +11,9 @@ const cloudinary = require('cloudinary').v2;
 const { query, pool } = require('./db/database');
 
 const app = express();
+
+// Trust Render's reverse proxy so secure cookies work over HTTPS
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // ── Cloudinary config ────────────────────────────────
@@ -289,11 +292,11 @@ app.get('/admin', requireAuth, async (req, res) => {
     const topPosts      = (await query(`SELECT title, slug, view_count FROM posts WHERE published=TRUE ORDER BY view_count DESC LIMIT 5`)).rows;
 
     const topPostsHTML = topPosts.map((p, i) => `
-      <div class="top-post-row">
-        <span class="top-rank">${i+1}</span>
-        <span class="top-title"><a href="/post/${p.slug}" target="_blank">${p.title}</a></span>
-        <span class="top-views">👁 ${p.view_count || 0}</span>
-      </div>`).join('') || '<p style="color:var(--ink-faint);font-size:0.85rem">No views yet.</p>';
+      <div style="display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid rgba(174,214,241,0.15);">
+        <span style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--sky-deep),var(--lav-deep));color:white;font-size:0.63rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</span>
+        <a href="/post/${p.slug}" target="_blank" style="flex:1;font-size:0.84rem;color:var(--ink);text-decoration:none;line-height:1.4">${p.title}</a>
+        <span style="font-size:0.7rem;font-weight:700;color:var(--ink-faint);white-space:nowrap">👁 ${p.view_count || 0}</span>
+      </div>`).join('') || '<p style="color:var(--ink-faint);font-size:0.84rem;padding:8px 0">No views yet.</p>';
 
     renderFile(path.join(__dirname, 'views/admin/dashboard.html'), {
       totalPosts: posts.length,
