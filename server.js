@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
@@ -7,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const { marked } = require('marked');
 const cloudinary = require('cloudinary').v2;
-const { query } = require('./db/database');
+const { query, pool } = require('./db/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,10 +47,20 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
+  store: new pgSession({
+    pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET || 'thinking-room-secret-2024',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 }
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 }));
 
 const requireAuth = (req, res, next) => req.session.admin ? next() : res.redirect('/admin/login');
@@ -250,7 +261,14 @@ app.post('/admin/login', async (req, res) => {
     const adminPass = result.rows[0];
     if (adminPass && bcrypt.compareSync(req.body.password, adminPass.value)) {
       req.session.admin = true;
-      return res.redirect('/admin');
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).send('Session error');
+        }
+        return res.redirect('/admin');
+      });
+      return;
     }
   } catch(e) { console.error(e); }
   renderFile(path.join(__dirname, 'views/admin/login.html'), {
