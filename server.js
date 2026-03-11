@@ -439,7 +439,7 @@ app.get('/admin', requireAuth, async (req, res) => {
 app.get('/admin/new', requireAuth, (req, res) => {
   renderFile(path.join(__dirname, 'views/admin/editor.html'), {
     pageTitle: 'New Post', action: '/admin/new',
-    title: '', excerpt: '', content: '', categories: '',
+    title: '', excerpt: '', content: '', content_raw: '', categories: '',
     published_checked: '', featured_checked: '', current_image: ''
   }, res);
 });
@@ -467,6 +467,7 @@ app.get('/admin/edit/:id', requireAuth, async (req, res) => {
       pageTitle: 'Edit Post', action: `/admin/edit/${post.id}`,
       title: post.title||'', excerpt: post.excerpt||'',
       content: (post.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+      content_raw: (post.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
       categories: post.categories||'',
       published_checked: post.published ? 'checked' : '',
       featured_checked:  post.featured  ? 'checked' : '',
