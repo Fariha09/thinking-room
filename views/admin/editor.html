@@ -6,6 +6,70 @@
   <title>{{pageTitle}} — The Thinking Room</title>
   <link rel="stylesheet" href="/css/admin.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+  <style>
+    /* ── Editor.js shell ── */
+    #editorjs {
+      min-height: 420px;
+      background: rgba(255,255,255,0.95);
+      border: 1.5px solid rgba(174,214,241,0.55);
+      border-radius: 10px;
+      padding: 24px 28px;
+      font-family: 'Lato', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      outline: none;
+      cursor: text;
+    }
+    .ce-block__content { max-width: 100% !important; }
+    .ce-toolbar__content { max-width: 100% !important; }
+    .ce-paragraph { font-size: 1rem; line-height: 1.75; color: var(--ink); }
+    .ce-header { font-family: 'Playfair Display', serif; color: var(--ink); }
+    .cdx-block { padding: 4px 0; }
+
+    /* Link card preview */
+    .link-card-preview {
+      border: 1.5px solid rgba(174,214,241,0.5);
+      border-radius: 10px;
+      padding: 14px 18px;
+      background: rgba(214,234,248,0.12);
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+    .link-card-preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+    .link-card-preview .link-meta { flex: 1; min-width: 0; }
+    .link-card-preview .link-title { font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-card-preview .link-desc { font-size: 0.8rem; color: var(--ink-faint); margin-top: 2px; }
+    .link-card-preview .link-url { font-size: 0.72rem; color: var(--accent); margin-top: 4px; }
+
+    /* Youtube embed preview */
+    .yt-preview {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+    .yt-preview iframe { width: 100%; height: 100%; border: none; }
+
+    .editor-toolbar-hint {
+      font-size: 0.75rem;
+      color: var(--ink-faint);
+      margin-top: 8px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .editor-toolbar-hint span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
 </head>
 <body>
   <div class="admin-layout">
@@ -37,23 +101,32 @@
 
       <div class="admin-content">
         <div class="editor-wrap">
-          <form method="POST" action="{{action}}" enctype="multipart/form-data">
+          <form id="post-form" method="POST" action="{{action}}" enctype="multipart/form-data">
 
+            <!-- Title -->
             <div class="form-group">
               <label for="title">Post Title *</label>
               <input type="text" id="title" name="title" value="{{title}}" placeholder="Give your post a title…" required>
             </div>
 
+            <!-- Excerpt -->
             <div class="form-group">
               <label for="excerpt">Excerpt / Summary</label>
-              <textarea id="excerpt" name="excerpt" placeholder="A short description that shows on the post card…" rows="3">{{excerpt}}</textarea>
-              <div class="form-hint">This shows as the preview text on the homepage.</div>
+              <textarea id="excerpt" name="excerpt" placeholder="A short description shown on the post card…" rows="3">{{excerpt}}</textarea>
+              <div class="form-hint">This shows as preview text on the homepage.</div>
             </div>
 
+            <!-- Rich Content Editor -->
             <div class="form-group">
-              <label for="content">Content (Markdown supported) *</label>
-              <textarea id="content" name="content" class="editor-textarea" placeholder="Write your story here…&#10;&#10;You can use **bold**, *italic*, # Headings, > blockquotes, and more!">{{content}}</textarea>
-              <div class="form-hint">Markdown formatting: **bold**, *italic*, # H1, ## H2, > blockquote, `code`, --- divider</div>
+              <label>Content *</label>
+              <div id="editorjs"></div>
+              <div class="editor-toolbar-hint">
+                <span>⌨️ Type to write</span>
+                <span>🔧 Press <kbd style="background:var(--sky-light);padding:1px 6px;border-radius:4px;font-size:0.72rem">/</kbd> or click <strong>+</strong> to insert a block</span>
+                <span>🖼 Image &nbsp;·&nbsp; 🎬 YouTube &nbsp;·&nbsp; 📹 Video &nbsp;·&nbsp; 🔗 Link &nbsp;·&nbsp; 💬 Quote</span>
+              </div>
+              <!-- Hidden field that stores Editor.js JSON -->
+              <input type="hidden" name="content" id="content-field" value="{{content}}">
             </div>
 
             <div class="editor-row">
@@ -65,8 +138,8 @@
 
               <div class="form-group">
                 <label for="cover_image">Cover Image</label>
-                <input type="file" id="cover_image" name="cover_image" accept="image/*" onchange="previewImage(this)">
-                <div class="form-hint">JPG, PNG, WebP — max 10MB</div>
+                <input type="file" id="cover_image" name="cover_image" accept="image/*" onchange="previewCover(this)">
+                <div class="form-hint">JPG, PNG, WebP — shown as the post hero image.</div>
                 {{current_image}}
                 <img id="img-preview" class="img-preview" style="display:none" alt="Preview">
               </div>
@@ -84,42 +157,129 @@
             </div>
 
             <div class="editor-actions">
-              <button type="submit" class="btn-save">💾 Save Post</button>
+              <button type="button" class="btn-save" onclick="savePost()">💾 Save Post</button>
               <a href="/admin" class="btn-cancel">Cancel</a>
             </div>
 
           </form>
         </div>
-
-        <!-- Markdown cheatsheet -->
-        <div style="margin-top:24px;padding:20px 24px;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border:1.5px solid rgba(174,214,241,0.4);border-radius:12px;box-shadow:0 2px 12px var(--shadow)">
-          <h3 style="font-family:var(--font-head);font-size:0.95rem;margin-bottom:14px;color:var(--ink)">📖 Markdown Quick Reference</h3>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 24px;font-size:0.8rem;color:var(--ink-soft)">
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px"># Heading 1</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">## Heading 2</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">**bold text**</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">*italic text*</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">> blockquote</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">- list item</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">[link text](url)</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">![alt](image-url)</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">---  (divider)</code></div>
-            <div><code style="background:var(--sky-light);padding:2px 6px;border-radius:4px">`inline code`</code></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 
+  <!-- Editor.js core + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.29.1/dist/editorjs.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.8.1/dist/header.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.9.0/dist/list.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.6.0/dist/quote.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.4.2/dist/delimiter.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.9.1/dist/image.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@2.7.4/dist/embed.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/attaches@1.3.0/dist/attaches.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@2.6.2/dist/link.umd.min.js"></script>
+
   <script>
-    function previewImage(input) {
+    // Parse existing content
+    let existingData = null;
+    const raw = document.getElementById('content-field').value.trim();
+    if (raw) {
+      try {
+        // Try JSON (new format)
+        existingData = JSON.parse(raw);
+      } catch(e) {
+        // Old markdown — wrap as single paragraph block
+        existingData = {
+          blocks: [{ type: 'paragraph', data: { text: raw.replace(/</g,'&lt;').replace(/>/g,'&gt;') } }]
+        };
+      }
+    }
+
+    const editor = new EditorJS({
+      holder: 'editorjs',
+      autofocus: true,
+      placeholder: 'Tell your story… press / or click + to insert images, videos, links and more',
+      data: existingData || undefined,
+
+      tools: {
+        header: {
+          class: Header,
+          config: { levels: [2, 3, 4], defaultLevel: 2 }
+        },
+        list: {
+          class: List,
+          inlineToolbar: true
+        },
+        quote: {
+          class: Quote,
+          inlineToolbar: true,
+          config: { quotePlaceholder: 'Your quote…', captionPlaceholder: 'Attribution' }
+        },
+        delimiter: Delimiter,
+
+        // Images → upload to Cloudinary via server
+        image: {
+          class: ImageTool,
+          config: {
+            endpoints: { byFile: '/admin/upload-image', byUrl: '/admin/upload-image-url' },
+            additionalRequestHeaders: {},
+            field: 'image',
+            types: 'image/*',
+          }
+        },
+
+        // YouTube, Vimeo, CodePen embeds
+        embed: {
+          class: Embed,
+          config: {
+            services: {
+              youtube: true,
+              vimeo: true,
+            }
+          }
+        },
+
+        // Link with preview card
+        linkTool: {
+          class: LinkTool,
+          config: { endpoint: '/admin/fetch-link' }
+        },
+
+        // Video/file uploads
+        attaches: {
+          class: AttachesTool,
+          config: { endpoint: '/admin/upload-file' }
+        }
+      },
+
+      onChange: () => {
+        // Keep hidden field in sync on every keystroke
+        editor.save().then(data => {
+          document.getElementById('content-field').value = JSON.stringify(data);
+        });
+      }
+    });
+
+    async function savePost() {
+      try {
+        const data = await editor.save();
+        document.getElementById('content-field').value = JSON.stringify(data);
+
+        if (!document.getElementById('title').value.trim()) {
+          alert('Please add a title before saving.');
+          return;
+        }
+        document.getElementById('post-form').submit();
+      } catch(e) {
+        console.error('Save error:', e);
+        alert('Could not save. Please try again.');
+      }
+    }
+
+    function previewCover(input) {
       const preview = document.getElementById('img-preview');
       if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = e => {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-        };
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
         reader.readAsDataURL(input.files[0]);
       }
     }

@@ -26,7 +26,7 @@ cloudinary.config({
 // ── Multer (memory storage — no local disk) ──────────
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const ok = /jpeg|jpg|png|gif|webp/.test(file.mimetype);
     ok ? cb(null, true) : cb(new Error('Images only'));
@@ -34,11 +34,11 @@ const upload = multer({
 });
 
 // Upload buffer to Cloudinary, return secure URL
-async function uploadToCloudinary(buffer, mimetype) {
+async function uploadToCloudinary(buffer, mimetype, resourceType='image') {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'thinking-room', resource_type: 'image' },
-      (err, result) => err ? reject(err) : resolve(result.secure_url)
+      { folder: 'thinking-room', resource_type: resourceType },
+      (err, result) => err ? reject(err) : resolve({ url: result.secure_url, name: result.original_filename, size: result.bytes })
     );
     stream.end(buffer);
   });
@@ -72,6 +72,61 @@ const requireAuth = (req, res, next) => req.session.admin ? next() : res.redirec
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
+function renderContent(raw) {
+  if (!raw) return '';
+  try {
+    const data = JSON.parse(raw);
+    if (!data.blocks) throw new Error('not editorjs');
+    return data.blocks.map(block => {
+      switch(block.type) {
+        case 'paragraph':
+          return `<p>${block.data.text}</p>`;
+        case 'header':
+          const level = block.data.level || 2;
+          return `<h${level}>${block.data.text}</h${level}>`;
+        case 'list':
+          const tag = block.data.style === 'ordered' ? 'ol' : 'ul';
+          const items = (block.data.items || []).map(i => `<li>${typeof i === 'object' ? i.content : i}</li>`).join('');
+          return `<${tag}>${items}</${tag}>`;
+        case 'quote':
+          return `<blockquote>${block.data.text}${block.data.caption ? `<cite>${block.data.caption}</cite>` : ''}</blockquote>`;
+        case 'delimiter':
+          return `<hr>`;
+        case 'image':
+          const img = block.data;
+          const caption = img.caption ? `<figcaption>${img.caption}</figcaption>` : '';
+          const stretched = img.stretched ? 'style="width:100%"' : '';
+          return `<figure class="post-image"${stretched}><img src="${img.file?.url || img.url}" alt="${img.caption || ''}">${caption}</figure>`;
+        case 'embed':
+          const service = block.data.service;
+          const embedUrl = block.data.embed;
+          if (service === 'youtube' || service === 'vimeo') {
+            return `<div class="post-video-wrap"><iframe src="${embedUrl}" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>`;
+          }
+          return `<div class="post-embed"><a href="${block.data.source}" target="_blank" rel="noopener">${block.data.source}</a></div>`;
+        case 'linkTool':
+          const link = block.data;
+          const meta = link.meta || {};
+          const thumb = meta.image?.url ? `<img src="${meta.image.url}" alt="">` : '';
+          return `<a href="${link.link}" target="_blank" rel="noopener" class="post-link-card">${thumb}<div class="post-link-meta"><div class="post-link-title">${meta.title || link.link}</div>${meta.description ? `<div class="post-link-desc">${meta.description}</div>` : ''}<div class="post-link-url">${link.link}</div></div></a>`;
+        case 'attaches':
+          const file = block.data.file;
+          const size = file.size ? ` (${Math.round(file.size/1024)}KB)` : '';
+          // If it's a video, embed it
+          if (file.url && /\.(mp4|webm|mov|ogg)$/i.test(file.url)) {
+            return `<div class="post-video-wrap"><video controls><source src="${file.url}"><a href="${file.url}">Download video</a></video></div>`;
+          }
+          return `<a href="${file.url}" class="post-file-card" target="_blank" download><span class="post-file-icon">📎</span><span class="post-file-name">${file.name || 'File'}${size}</span><span class="post-file-dl">Download →</span></a>`;
+        default:
+          return '';
+      }
+    }).join('\n');
+  } catch(e) {
+    // Fallback: old markdown content
+    return marked(raw);
+  }
+}
+
 function readTime(content) {
   const words = (content || '').replace(/#|\*|`|>/g, '').trim().split(/\s+/).length;
   return `${Math.max(1, Math.round(words / 200))} min read`;
@@ -206,7 +261,7 @@ app.get('/post/:slug', async (req, res) => {
       viewcount: (post.view_count || 0) + 1,
       categories: post.categories ? post.categories.split(',').map(c => `<span class="tag">${c.trim()}</span>`).join('') : '',
       cover: post.cover_image ? `<img src="${post.cover_image}" alt="${post.title}" class="post-cover">` : '',
-      content: marked(post.content || ''),
+      content: renderContent(post.content || ''),
       excerpt: post.excerpt || '',
       related: relatedResult.rows.map(buildPostCard).join(''),
       postid: post.id,
@@ -279,6 +334,63 @@ app.post('/admin/login', async (req, res) => {
   }, res);
 });
 
+// ── Media Upload Routes (for Editor.js) ─────────────
+
+// Upload image from file → Cloudinary
+app.post('/admin/upload-image', requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: 0, message: 'No file received' });
+    const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype, 'image');
+    res.json({ success: 1, file: { url: result.url } });
+  } catch(e) { console.error(e); res.json({ success: 0, message: e.message }); }
+});
+
+// Upload image from URL → return as-is
+app.post('/admin/upload-image-url', requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.json({ success: 0, message: 'No URL provided' });
+    res.json({ success: 1, file: { url } });
+  } catch(e) { res.json({ success: 0, message: e.message }); }
+});
+
+// Upload video or any file → Cloudinary
+app.post('/admin/upload-file', requireAuth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: 0, message: 'No file received' });
+    const isVideo = req.file.mimetype.startsWith('video/');
+    const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype, isVideo ? 'video' : 'raw');
+    res.json({
+      success: 1,
+      file: {
+        url: result.url,
+        name: req.file.originalname,
+        size: req.file.size,
+        extension: req.file.originalname.split('.').pop()
+      }
+    });
+  } catch(e) { console.error(e); res.json({ success: 0, message: e.message }); }
+});
+
+// Fetch link metadata (for link card preview)
+app.post('/admin/fetch-link', requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.json({ success: 0, message: 'No URL' });
+    // Return minimal metadata — browser will show the URL at minimum
+    res.json({
+      success: 1,
+      meta: {
+        title: url,
+        description: '',
+        image: { url: '' }
+      },
+      link: url
+    });
+  } catch(e) { res.json({ success: 0, message: e.message }); }
+});
+
+
 app.get('/admin/logout', (req, res) => { req.session.destroy(); res.redirect('/admin/login'); });
 
 app.get('/admin', requireAuth, async (req, res) => {
@@ -337,7 +449,7 @@ app.post('/admin/new', requireAuth, upload.single('cover_image'), async (req, re
     const { title, excerpt, content, categories, published, featured } = req.body;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') + '-' + Date.now();
     let cover = null;
-    if (req.file) cover = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+    if (req.file) { const r = await uploadToCloudinary(req.file.buffer, req.file.mimetype); cover = r.url; }
     await query(
       `INSERT INTO posts (title,slug,excerpt,content,categories,cover_image,published,featured) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
       [title, slug, excerpt||'', content||'', categories||'', cover, !!published, !!featured]
@@ -369,7 +481,7 @@ app.post('/admin/edit/:id', requireAuth, upload.single('cover_image'), async (re
   try {
     const { title, excerpt, content, categories, published, featured } = req.body;
     let cover = (await query(`SELECT cover_image FROM posts WHERE id=$1`, [req.params.id])).rows[0]?.cover_image;
-    if (req.file) cover = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+    if (req.file) { const r = await uploadToCloudinary(req.file.buffer, req.file.mimetype); cover = r.url; }
     await query(
       `UPDATE posts SET title=$1,excerpt=$2,content=$3,categories=$4,cover_image=$5,published=$6,featured=$7,updated_at=NOW() WHERE id=$8`,
       [title, excerpt||'', content||'', categories||'', cover, !!published, !!featured, req.params.id]
