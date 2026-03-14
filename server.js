@@ -136,7 +136,7 @@ function readTime(content) {
 function buildPostCard(post) {
   const img = post.cover_image
     ? `<div class="card-img"><img src="${post.cover_image}" alt="${post.title}" loading="lazy"></div>`
-    : `<div class="card-img card-img-placeholder"><div class="placeholder-icon">☁️</div></div>`;
+: `<div class="card-img" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(174,214,241,0.15),rgba(201,184,224,0.15))"><img src="/android-chrome-192x192.png" style="width:60px;height:60px;opacity:0.7"></div>`
   const cats = post.categories
     ? post.categories.split(',').map(c => `<span class="tag">${c.trim()}</span>`).join('')
     : '';
