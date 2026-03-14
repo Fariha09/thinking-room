@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280">
+  <defs>
+    <radialGradient id="tg" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#eeeeee"/>
+      <stop offset="100%" stop-color="#d0d0d0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Cloud emoji rendered as text -->
+  <text x="20" y="200" font-size="200" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">☁️</text>
+
+  <!-- Thought bubble tail -->
+  <circle cx="84" cy="212" r="10" fill="url(#tg)"/>
+  <circle cx="62" cy="234" r="7" fill="url(#tg)"/>
+  <circle cx="45" cy="252" r="4.5" fill="url(#tg)"/>
+
+  <!-- Dot highlights -->
+  <circle cx="80" cy="208" r="3.2" fill="#ffffff" opacity="0.9"/>
+  <circle cx="59" cy="230" r="2.2" fill="#ffffff" opacity="0.85"/>
+  <circle cx="42" cy="248" r="1.4" fill="#ffffff" opacity="0.8"/>
+</svg>
