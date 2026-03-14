@@ -80,7 +80,8 @@ body::before {
   justify-content: space-between;
   height: 72px;
 }
-.site-logo { display:flex; flex-direction:column; line-height:1.1; text-decoration:none; }
+.site-logo { display:flex; flex-direction:row; align-items:center; gap:10px; line-height:1.1; text-decoration:none; }
+.site-logo .logo-text { display:flex; flex-direction:column; }
 .site-logo .logo-main {
   font-family: var(--font-fancy);
   font-size: 1.9rem;
@@ -92,6 +93,11 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 3px;
   color: var(--ink-faint);
+}
+.site-logo img {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
 }
 .masthead-nav { display:flex; gap:8px; align-items:center; }
 .masthead-nav a {
@@ -246,7 +252,7 @@ body::before {
 .card-title a:hover { color:var(--accent); }
 .card-excerpt {
   font-size:0.86rem; color:var(--ink-soft); line-height:1.65; flex:1; margin-bottom:14px;
-  display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
 }
 .read-more {
   font-size:0.75rem; font-weight:700; text-transform:uppercase;
