@@ -265,6 +265,8 @@ app.get('/post/:slug', async (req, res) => {
       cover: post.cover_image ? `<img src="${post.cover_image}" alt="${post.title}" class="post-cover">` : '',
       content: renderContent(post.content || ''),
       excerpt: post.excerpt || '',
+      slug: post.slug,
+      og_image: post.cover_image || 'https://res.cloudinary.com/deuer5vhx/image/upload/w_200,h_200,c_fill,g_face,r_max/v1773196476/avatar1_zgf5ur.jpg',
       related: relatedResult.rows.map(buildPostCard).join(''),
       postid: post.id,
       comments: commentsHTML,
