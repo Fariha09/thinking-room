@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <defs>
+    <linearGradient id="gvane" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="28%"  stop-color="#2a2a2a"/>
+      <stop offset="48%"  stop-color="#787878"/>
+      <stop offset="62%"  stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="gspine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="40%"  stop-color="#888888"/>
+      <stop offset="60%"  stop-color="#444444"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="gmetal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="30%"  stop-color="#888888"/>
+      <stop offset="50%"  stop-color="#cccccc"/>
+      <stop offset="70%"  stop-color="#666666"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="gnib" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="50%"  stop-color="#999999"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(54, 8) scale(0.82)">
+    <g transform="rotate(16, 80, 150)">
+      <path d="M 80 205 C 82 178 87 148 94 118 C 103 82 118 48 134 18 C 144 -2 150 -18 148 -30 C 144 -22 138 -8 130 10 C 118 36 104 72 94 110 C 86 142 82 172 80 205 Z" fill="#111111"/>
+      <path d="M 80 205 C 80 175 80 140 80 105 C 80 70 80 30 80 -30 C 80 30 80 70 80 105 C 80 140 80 175 80 205 Z" fill="#111111"/>
+      <path d="M 80 205 C 82 175 88 142 96 112 C 106 76 122 42 138 12 C 146 -6 150 -20 148 -30 C 136 -20 122 2 110 28 C 96 58 84 96 80 205 Z" fill="#1a1a1a"/>
+      <path d="M 80 205 C 79 175 78 142 77 112 C 76 80 76 46 78 10 C 79 -8 80 -20 80 -30 C 80 -20 81 -8 82 10 C 84 46 84 80 83 112 C 82 142 81 175 80 205 Z" fill="#222222"/>
+      <path d="M 83 192 C 96 165 112 130 124 92 C 134 58 140 24 142 -4" stroke="#888888" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.35"/>
+      <path d="M 82 180 C 94 154 108 118 120 80 C 130 48 138 14 140 -12" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.15"/>
+      <path d="M 81 185 C 97 174 114 158 128 140" stroke="#555" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M 82 164 C 99 152 118 134 134 114" stroke="#555" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M 84 142 C 103 128 124 108 140 86" stroke="#444" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+      <path d="M 86 120 C 106 104 128 82 144 58"  stroke="#444" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+      <path d="M 88 96  C 108 78 130 54 146 28"   stroke="#333" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <path d="M 90 72  C 110 52 132 26 146 0"    stroke="#333" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <path d="M 92 48  C 112 26 134 0 146 -24"   stroke="#333" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+      <path d="M 76 220 C 76 196 77 166 78 136 C 79 106 79.5 66 79.8 16 C 79.9 -8 80 -28 80 -52 C 80 -28 80.1 -8 80.2 16 C 80.5 66 81 106 82 136 C 83 166 84 196 84 220 Z" fill="url(#gspine)"/>
+      <line x1="80" y1="-48" x2="80" y2="218" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round" opacity="0.18"/>
+      <path d="M 80 -48 C 78 -56 77 -64 80 -70 C 83 -64 82 -56 80 -48 Z" fill="#111"/>
+      <path d="M 76 220 C 76 212 77 204 78 196 C 79 190 80 186 80 184 C 80 186 81 190 82 196 C 83 204 84 212 84 220 Z" fill="url(#gspine)" opacity="0.9"/>
+      <rect x="76" y="220" width="8" height="44" rx="2" fill="url(#gmetal)"/>
+      <rect x="75" y="218" width="10" height="5" rx="2" fill="#555"/>
+      <rect x="75" y="258" width="10" height="5" rx="2" fill="#444"/>
+      <line x1="79" y1="222" x2="79" y2="260" stroke="#ffffff" stroke-width="1.2" opacity="0.26" stroke-linecap="round"/>
+      <path d="M 75 262 C 76 272 78 284 80 294 C 82 284 84 272 85 262 Z" fill="url(#gnib)"/>
+      <line x1="80" y1="266" x2="80" y2="292" stroke="#444" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="77" y1="264" x2="78" y2="288" stroke="#cccccc" stroke-width="0.8" opacity="0.38" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
