@@ -1,3 +1,6 @@
+![logo](https://github.com/user-attachments/assets/34fe73a0-5df5-416e-92a5-6fd2abaaaace)
+
+
 # 🌸 The Thinking Room
 
 A soothing personal blog website with a newspaper layout, pale blue watercolor aesthetic, and a full backend powered by Node.js + SQLite.
